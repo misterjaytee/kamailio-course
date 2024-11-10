@@ -17,6 +17,9 @@ services:
   kamailio-edge:
     image: kamailio/kamailio-ci:5.4-alpine.debug
     container_name: kamailio-edge
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "5090:5060"
     volumes:
@@ -96,6 +99,12 @@ services:
 
   db:
     image: mysql:5.7
+    healthcheck:
+      test: "mysql --user=root --password=$$MYSQL_ROOT_PASSWORD --execute \"SHOW DATABASES;\" || exit 1"
+      interval: 10s
+      timeout: 30s
+      retries: 10
+      start_period: 5s
     restart: always
     container_name: db01
     environment:
